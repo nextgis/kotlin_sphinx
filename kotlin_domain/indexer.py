@@ -377,7 +377,7 @@ class KotlinObjectIndex(object):
                     if typeVal == 'init' or typeVal == 'init?':
                         nameVal = 'init'
 
-                    print 'Match ' + l + '[{},{},{}]'.format(nameVal, typeVal,scope)
+                    # print 'Match ' + l + '[{},{},{}]'.format(nameVal, typeVal,scope)
 
                     self.index.append({
                         'scope': scope,
@@ -389,8 +389,6 @@ class KotlinObjectIndex(object):
                         'raw_value': match['raw_value'].strip() if 'raw_value' in match and match['raw_value'] else None,
                         'raw': l
                     })
-                # else:
-                #     print 'Not match ' + l
 
     @staticmethod
     def documentation(item, indent="    ", noindex=False, nodocstring=False, location=None):
