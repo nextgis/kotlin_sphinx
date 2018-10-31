@@ -173,14 +173,14 @@ def doc_block_to_rst(doc_block):
         if match:
             match = match.groupdict()
             # if emit_directive(): yield ''
-            yield ':parameter ' + match ['param'] + ': ' + match['desc']
+            yield ':parameter ' + match['param'] + ': ' + match['desc']
             continue
 
         match = property_pattern.match(l)
         if match:
             match = match.groupdict()
             # if emit_directive(): yield ''
-            yield ':property ' + match ['param'] + ': ' + match['desc']
+            yield ':property ' + match['param'] + ': ' + match['desc']
             continue
 
         c = False #continue if required
@@ -242,7 +242,7 @@ class KotlinFileIndex(object):
                                 'file': file,
                                 'line': index,
                                 'depth': 1 if braces == 0 else braces,
-                                'type': clearName(struct),
+                                'type': clearName(struct, ' '),
                                 'scope': scope,
                                 'name': match['name'].strip(),
                                 'docstring': get_doc_block(content, index - 1),
@@ -310,7 +310,7 @@ class KotlinObjectIndex(object):
 
     def __init__(self, content, line, typ):
         signatures = [func_pattern, init_pattern, var_pattern]
-        if typ == 'enum_class':
+        if typ == 'enum class':
             signatures = [func_pattern, init_pattern, case_pattern]
         # elif typ == 'protocol':
         #     signatures = [func_pattern, init_pattern, proto_var_pattern]
@@ -369,7 +369,7 @@ class KotlinObjectIndex(object):
 
                     if 'type' in match and match['type']:
                         typeVal = match['type'].strip()
-                    if typ == 'enum_class':
+                    if typ == 'enum class':
                         typeVal = 'case'
 
                     if 'name' in match and match['name']:

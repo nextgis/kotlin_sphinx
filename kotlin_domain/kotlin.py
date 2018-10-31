@@ -108,6 +108,60 @@ class KotlinObjectDescription(ObjectDescription):
 
 class KotlinClass(KotlinObjectDescription):
 
+    doc_field_types = [
+        TypedField('property', label=l_('Properties'),
+                   names=('prop', 'property', 'arg', 'argument', 'param', 'parameters'),
+                   typerolename='obj', typenames=('proptype', 'type')),
+    ]
+
+    def _parse_property_list(self, parameter_list):
+        parameters = []
+        parens = {'[]': 0, '()': 0, '<>': 0}
+        last_split = 0
+        for i, c in enumerate(parameter_list):
+            for key, value in parens.items():
+                if c == key[0]:
+                    value += 1
+                    parens[key] = value
+                if c == key[1]:
+                    value -= 1
+                    parens[key] = value
+
+            skip_comma = False
+            for key, value in parens.items():
+                if value != 0:
+                    skip_comma = True
+
+            if c == ',' and not skip_comma:
+                parameters.append(parameter_list[last_split:i].strip())
+                last_split = i + 1
+        parameters.append(parameter_list[last_split:].strip())
+
+        result = []
+        for parameter in parameters:
+            name, rest = [x.strip() for x in parameter.split(':', 1)]
+            name_parts = name.split(' ', 1)
+            if len(name_parts) > 1:
+                name = name_parts[0]
+                variable_name = name_parts[1]
+            else:
+                name = name_parts[0]
+                variable_name = name_parts[0]
+            equals = rest.rfind('=')
+            if equals >= 0:
+                default_value = rest[equals + 1:].strip()
+                param_type = rest[:equals].strip()
+            else:
+                default_value = None
+                param_type = rest
+            result.append({
+                "name": name,
+                "variable_name": variable_name,
+                "type": param_type,
+                "default": default_value
+            })
+        return result
+
     def handle_signature(self, sig, signode):
         container_class_name = self.env.temp_data.get('kotlin:class')
 
@@ -155,6 +209,26 @@ class KotlinClass(KotlinObjectDescription):
         # Add class name
         signode += addnodes.desc_addname(self.objtype, self.objtype + ' ')
         signode += addnodes.desc_name(class_name, class_name)
+
+        # rest = sig[split_point:]
+        #
+        # # split parameter list
+        # parameter_list = None
+        # depth = 0
+        # for i, c in enumerate(rest):
+        #     if c == '(':
+        #         depth += 1
+        #     elif c == ')':
+        #         depth -= 1
+        #     if depth == 0:
+        #         parameter_list = rest[1:i]
+        #         rest = rest[i + 1:]
+        #         break
+        #
+        # if parameter_list is not None and len(parameter_list) > 0:
+        #     parameters = self._parse_property_list(parameter_list)
+        # else:
+        #     parameters = []
 
         # if we had super classes add annotation
         if super_classes:
@@ -452,14 +526,10 @@ class KotlinClassIvar(KotlinObjectDescription):
 
         match = match.groupdict()
 
-        if self.objtype == 'static_var':
-            signode += addnodes.desc_addname("static var", "static var ")
-        elif self.objtype == 'static_let':
-            signode += addnodes.desc_addname("static let", "static let ")
-        elif self.objtype == 'var':
+        if self.objtype == 'var':
             signode += addnodes.desc_addname("var", "var ")
-        elif self.objtype == 'let':
-            signode += addnodes.desc_addname("let", "let ")
+        elif self.objtype == 'val':
+            signode += addnodes.desc_addname("val", "val ")
 
         name = match['name'].strip()
         signature = name
@@ -586,15 +656,16 @@ class KotlinDomain(Domain):
         'method':          ObjType(l_('method'),              'method',       'obj'),
         'class_method':    ObjType(l_('class method'),        'class_method', 'obj'),
         'static_method':   ObjType(l_('static method'),       'static_method','obj'),
+        'object':          ObjType(l_('object'),              'object',       'obj'),
         'class':           ObjType(l_('class'),               'class',        'obj'),
-        'enum':            ObjType(l_('enum'),                'enum',         'obj'),
+        'enum_class':      ObjType(l_('enum class'),          'enum_class',   'obj'),
         'enum_case':       ObjType(l_('enum case'),           'enum_case',    'obj'),
-        'struct':          ObjType(l_('struct'),              'struct',       'obj'),
+        'data_class':      ObjType(l_('data class'),          'data_class',   'obj'),
         'init':            ObjType(l_('initializer'),         'init',         'obj'),
         'protocol':        ObjType(l_('protocol'),            'protocol',     'obj'),
         'extension':       ObjType(l_('extension'),           'extension',    'obj'),
-        'default_impl':    ObjType(l_('extension'),           'default_impl', 'obj'),
-        'let':             ObjType(l_('constant'),            'let',          'obj'),
+        'default_impl':    ObjType(l_('default implementation'), 'default_impl', 'obj'),
+        'val':             ObjType(l_('constant'),            'val',          'obj'),
         'var':             ObjType(l_('variable'),            'var',          'obj'),
     }
 
@@ -602,6 +673,7 @@ class KotlinDomain(Domain):
         'function':        KotlinClassmember,
         'method':          KotlinClassmember,
         'class_method':    KotlinClassmember,
+        'object':          KotlinClass,
         'class':           KotlinClass,
         'enum_class':      KotlinClass,
         'enum_case':       KotlinEnumCase,
@@ -617,6 +689,7 @@ class KotlinDomain(Domain):
     roles = {
         'function':      KotlinXRefRole("function"),
         'method':        KotlinXRefRole("method"),
+        'object':        KotlinXRefRole("object"),
         'class':         KotlinXRefRole("class"),
         'enum_class':    KotlinXRefRole("enum_class"),
         'enum_case':     KotlinXRefRole("enum_case"),
