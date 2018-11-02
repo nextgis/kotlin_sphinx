@@ -480,7 +480,7 @@ class KotlinFileIndex(object):
         yield ''
 
         if not nodocstring:
-            for line in doc_block_to_rst(item['docstring'], True):
+            for line in doc_block_to_rst(item['docstring'], item['type'] != 'fun'):
                 yield indent + line
             # yield ''
 
