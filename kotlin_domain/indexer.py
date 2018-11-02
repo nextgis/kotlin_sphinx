@@ -298,7 +298,8 @@ def analyze_class_line(index, content):
             if char == '{':
                 out['no_body'] = False
                 return out
-            elif char == '(':
+
+            if char == '(':
                 brace_balance += 1
             elif char == ')':
                 brace_balance -= 1
@@ -612,7 +613,7 @@ class KotlinObjectIndex(object):
                                     strip_variable = variable.replace(':', '|').replace('=', '|').split('|')
                                     docstring_new.append('@param ' + strip_variable[0] + ' ' + ''.join(get_docstring_for_param(strip_variable[0], docstring)))
 
-                            # match['rest'] += ')'
+                            match['rest'] += ')'
                         for constructorVariable in constructorVariables:
                             if constructorVariable['docstring']:
                                 docstring_new.append('@param ' + constructorVariable['name'] + ' ' + ''.join(constructorVariable['docstring']))
