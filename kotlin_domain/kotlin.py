@@ -220,13 +220,6 @@ class KotlinClassmember(KotlinObjectDescription):
         result = []
         for parameter in parameters:
             name, rest = [x.strip() for x in parameter.split(':', 1)]
-            name_parts = name.split(' ', 1)
-            if len(name_parts) > 1:
-                name = name_parts[0]
-                variable_name = name_parts[1]
-            else:
-                name = name_parts[0]
-                variable_name = name_parts[0]
             equals = rest.rfind('=')
             if equals >= 0:
                 default_value = rest[equals + 1:].strip()
@@ -236,7 +229,6 @@ class KotlinClassmember(KotlinObjectDescription):
                 param_type = rest
             result.append({
                 "name": name,
-                "variable_name": variable_name,
                 "type": param_type,
                 "default": default_value
             })
@@ -285,10 +277,9 @@ class KotlinClassmember(KotlinObjectDescription):
                 rest = rest[i + 1:]
                 break
 
-        if parameter_list is not None and len(parameter_list) > 0:
+        parameters = []
+        if parameter_list:
             parameters = self._parse_parameter_list(parameter_list)
-        else:
-            parameters = []
 
         # check if it throws
         throws = rest.find('throws') >= 0
@@ -322,20 +313,14 @@ class KotlinClassmember(KotlinObjectDescription):
             signode += addnodes.desc_name('init', 'init')
             signature += 'init('
             for p in parameters:
-                if p['name'] == p['variable_name']:
-                    signature += p['name'] + ':'
-                else:
-                    signature += p['name'] + ' ' + p['variable_name'] + ':'
+                signature += p['name'] + ':'
             signature += ')'
         else:
             signode += addnodes.desc_name(method_name, method_name)
             signature += method_name
             signature += '('
             for p in parameters:
-                if p['name'] == p['variable_name']:
-                    signature += p['name'] + ':'
-                else:
-                    signature += p['name'] + ' ' + p['variable_name'] + ':'
+                signature += p['name'] + ':'
             signature += ')'
 
         if generics:
@@ -344,12 +329,8 @@ class KotlinClassmember(KotlinObjectDescription):
         params = []
         sig = ''
         for p in parameters:
-            if p['name'] == p['variable_name']:
-                param = p['name'] + ': ' # + p['type']
-                sig += p['name'] + ':'
-            else:
-                param = p['name'] + ' ' + p['variable_name'] + ':' # + p['type']
-                sig += p['name'] + ' ' + p['variable_name'] + ':'
+            param = p['name'] + ': ' # + p['type']
+            sig += p['name'] + ':'
             #if p['default']:
             #    param += ' = ' + p['default']
 
