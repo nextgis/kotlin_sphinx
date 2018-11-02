@@ -250,8 +250,9 @@ class KotlinClassmember(KotlinObjectDescription):
         first_anglebracket = sig.find('<')
         first_paren = sig.find('(')
         if first_anglebracket >= 0 and first_paren > first_anglebracket:
-            split_point = sig.find('>')+1
+            split_point = sig.find('>') + 1
         else:
+            first_anglebracket = -1
             split_point = first_paren
 
         # calculate generics
@@ -294,7 +295,17 @@ class KotlinClassmember(KotlinObjectDescription):
 
         # check for return type
         return_type = None
-        arrow = rest.find(':')
+        balance_braces = 0
+        counter = 0
+        for c in reversed(rest):
+            counter += 1
+            if balance_braces == 0 and c == ':':
+                break
+
+            if c == ')': balance_braces += 1
+            if c == '(': balance_braces -= 1
+
+        arrow = len(rest) - counter # rest.rfind(':')
         if arrow >= 0:
             return_type = rest[arrow + 2:].strip()
 
