@@ -286,17 +286,18 @@ class KotlinClassmember(KotlinObjectDescription):
 
         # check for return type
         return_type = None
-        balance_braces = 0
-        counter = 0
-        for c in reversed(rest):
-            counter += 1
-            if balance_braces == 0 and c == ':':
-                break
-
-            if c == ')': balance_braces += 1
-            if c == '(': balance_braces -= 1
-
-        arrow = len(rest) - counter # rest.rfind(':')
+        # balance_braces = 0
+        # counter = 0
+        # for c in reversed(rest):
+        #     counter += 1
+        #     if balance_braces == 0 and c == ':':
+        #         break
+        #
+        #     if c == ')': balance_braces += 1
+        #     if c == '(': balance_braces -= 1
+        #
+        # arrow = len(rest) - counter
+        arrow = rest.find(':')
         if arrow >= 0:
             return_type = rest[arrow + 2:].strip()
 
