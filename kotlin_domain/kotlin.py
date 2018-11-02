@@ -294,7 +294,7 @@ class KotlinClassmember(KotlinObjectDescription):
 
         # check for return type
         return_type = None
-        arrow = rest.find('->')
+        arrow = rest.find(':')
         if arrow >= 0:
             return_type = rest[arrow + 2:].strip()
 
@@ -354,16 +354,16 @@ class KotlinClassmember(KotlinObjectDescription):
         title = signature
         if throws:
             signode += addnodes.desc_annotation("throws", "throws")
-            # signature += "throws"
+            signature += "throws"
 
         if return_type:
-            paramNode = addnodes.desc_returns('', '')
+            paramNode = addnodes.desc_type('', '') #desc_returns('', '')
             paramXref = addnodes.pending_xref('', refdomain='kotlin', reftype='type', reftarget=return_type)
-            paramXref += nodes.Text(return_type, return_type)
+            paramXref += nodes.Text(" : " + return_type, " : " + return_type)
             paramNode += paramXref
             signode += paramNode
             # signode += addnodes.desc_returns(return_type, return_type)
-            #signature += "-" + return_type
+            signature += '-' + return_type
 
         #if container_class_type == 'protocol':
         #    signature += "-protocol"
