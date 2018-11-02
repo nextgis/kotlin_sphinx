@@ -108,60 +108,6 @@ class KotlinObjectDescription(ObjectDescription):
 
 class KotlinClass(KotlinObjectDescription):
 
-    doc_field_types = [
-        TypedField('property', label=l_('Properties'),
-                   names=('prop', 'property', 'arg', 'argument', 'param', 'parameters'),
-                   typerolename='obj', typenames=('proptype', 'type')),
-    ]
-
-    def _parse_property_list(self, parameter_list):
-        parameters = []
-        parens = {'[]': 0, '()': 0, '<>': 0}
-        last_split = 0
-        for i, c in enumerate(parameter_list):
-            for key, value in parens.items():
-                if c == key[0]:
-                    value += 1
-                    parens[key] = value
-                if c == key[1]:
-                    value -= 1
-                    parens[key] = value
-
-            skip_comma = False
-            for key, value in parens.items():
-                if value != 0:
-                    skip_comma = True
-
-            if c == ',' and not skip_comma:
-                parameters.append(parameter_list[last_split:i].strip())
-                last_split = i + 1
-        parameters.append(parameter_list[last_split:].strip())
-
-        result = []
-        for parameter in parameters:
-            name, rest = [x.strip() for x in parameter.split(':', 1)]
-            name_parts = name.split(' ', 1)
-            if len(name_parts) > 1:
-                name = name_parts[0]
-                variable_name = name_parts[1]
-            else:
-                name = name_parts[0]
-                variable_name = name_parts[0]
-            equals = rest.rfind('=')
-            if equals >= 0:
-                default_value = rest[equals + 1:].strip()
-                param_type = rest[:equals].strip()
-            else:
-                default_value = None
-                param_type = rest
-            result.append({
-                "name": name,
-                "variable_name": variable_name,
-                "type": param_type,
-                "default": default_value
-            })
-        return result
-
     def handle_signature(self, sig, signode):
         container_class_name = self.env.temp_data.get('kotlin:class')
 
@@ -183,13 +129,6 @@ class KotlinClass(KotlinObjectDescription):
             class_parts = class_name.split(' ')
         elif '\t' in class_name:
             class_parts = class_name.split('\t')
-        if class_parts:
-            # if a part starts with `where` then we have a type constraint
-            for index, p in enumerate(class_parts):
-                if p == 'where':
-                    type_constraint = " ".join(class_parts[index:]) + ": " + parts.pop()
-                    class_name = " ".join(class_parts[:index])
-                    break
 
         if class_name.count('.'):
             class_name = class_name.split('.')[-1]
@@ -199,36 +138,10 @@ class KotlinClass(KotlinObjectDescription):
         if len(parts) > 1:
             super_classes = [x.strip() for x in parts[1].split(',')]
 
-            # if a part starts with `where` then we have a type constraint
-            for index, sup in enumerate(super_classes):
-                if sup == 'where':
-                    type_constraint = " ".join(super_classes[index:])
-                    super_classes = super_classes[:index]
-                    break
-
         # Add class name
-        signode += addnodes.desc_addname(self.objtype, self.objtype + ' ')
+        objTypeFixed = self.objtype.replace('_', ' ')
+        signode += addnodes.desc_addname(objTypeFixed, objTypeFixed + ' ')
         signode += addnodes.desc_name(class_name, class_name)
-
-        # rest = sig[split_point:]
-        #
-        # # split parameter list
-        # parameter_list = None
-        # depth = 0
-        # for i, c in enumerate(rest):
-        #     if c == '(':
-        #         depth += 1
-        #     elif c == ')':
-        #         depth -= 1
-        #     if depth == 0:
-        #         parameter_list = rest[1:i]
-        #         rest = rest[i + 1:]
-        #         break
-        #
-        # if parameter_list is not None and len(parameter_list) > 0:
-        #     parameters = self._parse_property_list(parameter_list)
-        # else:
-        #     parameters = []
 
         # if we had super classes add annotation
         if super_classes:
@@ -388,11 +301,11 @@ class KotlinClassmember(KotlinObjectDescription):
         # build signature and add nodes
         signature = ''
         if self.objtype == 'static_method':
-            signode += addnodes.desc_addname("static", "static func ")
+            signode += addnodes.desc_addname("static", "static fun ")
         elif self.objtype == 'class_method':
-            signode += addnodes.desc_addname("class", "class func ")
+            signode += addnodes.desc_addname("class", "class fun ")
         elif self.objtype != 'init':
-            signode += addnodes.desc_addname("func", "func ")
+            signode += addnodes.desc_addname("fun", "fun ")
 
         if self.objtype == 'init':
             signode += addnodes.desc_name('init', 'init')
@@ -653,7 +566,8 @@ class KotlinDomain(Domain):
     label = 'Kotlin'
     object_types = {
         'function':        ObjType(l_('function'),            'function',     'obj'),
-        'method':          ObjType(l_('method'),              'method',       'obj'),
+        'fun':             ObjType(l_('fun'),                 'fun',          'obj'),
+        'static_fun':      ObjType(l_('static fun'),          'static_fun',   'obj'),
         'class_method':    ObjType(l_('class method'),        'class_method', 'obj'),
         'static_method':   ObjType(l_('static method'),       'static_method','obj'),
         'object':          ObjType(l_('object'),              'object',       'obj'),
@@ -662,16 +576,18 @@ class KotlinDomain(Domain):
         'enum_case':       ObjType(l_('enum case'),           'enum_case',    'obj'),
         'data_class':      ObjType(l_('data class'),          'data_class',   'obj'),
         'init':            ObjType(l_('initializer'),         'init',         'obj'),
+        'constructor':     ObjType(l_('constructor'),         'constructor',  'obj'),
         'protocol':        ObjType(l_('protocol'),            'protocol',     'obj'),
         'extension':       ObjType(l_('extension'),           'extension',    'obj'),
-        'default_impl':    ObjType(l_('default implementation'), 'default_impl', 'obj'),
+        'default_impl':    ObjType(l_('default implementation'),'default_impl','obj'),
         'val':             ObjType(l_('constant'),            'val',          'obj'),
         'var':             ObjType(l_('variable'),            'var',          'obj'),
     }
 
     directives = {
         'function':        KotlinClassmember,
-        'method':          KotlinClassmember,
+        'fun':             KotlinClassmember,
+        'static_fun':      KotlinClassmember,
         'class_method':    KotlinClassmember,
         'object':          KotlinClass,
         'class':           KotlinClass,
@@ -679,6 +595,7 @@ class KotlinDomain(Domain):
         'enum_case':       KotlinEnumCase,
         'data_class':      KotlinClass,
         'init':            KotlinClassmember,
+        'constructor':     KotlinClassmember,
         'protocol':        KotlinClass,
         'extension':       KotlinClass,
         'default_impl':    KotlinClass,
@@ -688,13 +605,15 @@ class KotlinDomain(Domain):
 
     roles = {
         'function':      KotlinXRefRole("function"),
-        'method':        KotlinXRefRole("method"),
+        'fun':           KotlinXRefRole("fun"),
+        'static_fun':    KotlinXRefRole("static_fun"),
         'object':        KotlinXRefRole("object"),
         'class':         KotlinXRefRole("class"),
         'enum_class':    KotlinXRefRole("enum_class"),
         'enum_case':     KotlinXRefRole("enum_case"),
         'data_class':    KotlinXRefRole("data_class"),
         'init':          KotlinXRefRole("init"),
+        'constructor':   KotlinXRefRole("constructor"),
         'class_method':  KotlinXRefRole("class_method"),
         'protocol':      KotlinXRefRole("protocol"),
         'extension':     KotlinXRefRole("extension"),
