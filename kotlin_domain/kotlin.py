@@ -300,7 +300,7 @@ class KotlinClassmember(KotlinObjectDescription):
 
         # build signature and add nodes
         signature = ''
-        if self.objtype == 'static_method':
+        if self.objtype == 'static_fun':
             signode += addnodes.desc_addname("static", "static fun ")
         elif self.objtype == 'class_method':
             signode += addnodes.desc_addname("class", "class fun ")
@@ -569,7 +569,6 @@ class KotlinDomain(Domain):
         'fun':             ObjType(l_('fun'),                 'fun',          'obj'),
         'static_fun':      ObjType(l_('static fun'),          'static_fun',   'obj'),
         'class_method':    ObjType(l_('class method'),        'class_method', 'obj'),
-        'static_method':   ObjType(l_('static method'),       'static_method','obj'),
         'object':          ObjType(l_('object'),              'object',       'obj'),
         'class':           ObjType(l_('class'),               'class',        'obj'),
         'enum_class':      ObjType(l_('enum class'),          'enum_class',   'obj'),
