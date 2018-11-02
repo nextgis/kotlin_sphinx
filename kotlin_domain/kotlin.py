@@ -357,9 +357,9 @@ class KotlinClassmember(KotlinObjectDescription):
             signature += "throws"
 
         if return_type:
-            paramNode = addnodes.desc_type('', '') #desc_returns('', '')
+            paramNode = addnodes.desc_type(' : ', ' : ') #desc_returns('', '')
             paramXref = addnodes.pending_xref('', refdomain='kotlin', reftype='type', reftarget=return_type)
-            paramXref += nodes.Text(" : " + return_type, " : " + return_type)
+            paramXref += nodes.Text(return_type, return_type)
             paramNode += paramXref
             signode += paramNode
             # signode += addnodes.desc_returns(return_type, return_type)
