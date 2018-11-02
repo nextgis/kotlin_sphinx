@@ -23,7 +23,7 @@
 
 import argparse
 import os
-from indexer import KotlinFileIndex, KotlinObjectIndex
+from .indexer import KotlinFileIndex, KotlinObjectIndex
 
 parser = argparse.ArgumentParser(description='Create reStructured text documentation from Kotlin code.')
 parser.add_argument('source_path', type=str, help='Path to Kotlin files')
@@ -105,7 +105,7 @@ def document_member(parent, args, file, fp, indent):
         return
     for member in parent['members'].index:
         add = True
-        
+
         # Always document enum cases
         if args.undoc is False and len(member['docstring']) == 0 and member['type'] != 'enum_case':
             add = False
