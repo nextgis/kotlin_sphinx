@@ -27,33 +27,33 @@ import fnmatch
 import io
 
 # member patterns
-func_pattern = re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+)?(?P<type>fun)\s+(?P<template><T>)?\s*(?P<name>[a-zA-Z_][a-zA-Z0-9_.]*\b)(?P<rest>[^{]*)')
-init_pattern = re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+)?(?P<type>(init|constructor|firstconstructor))\s*(?P<rest>[^{]*)')
-var_pattern = re.compile(r'\s*(?P<add_scope>private\s*\(set\)\s+|private\s*\(get\)\s+)?(?P<scope>private\s+|public\s+|open\s+|internal\s+)?(final\s+)?(?P<type>var\s+|val\s+)(?P<name>[a-zA-Z_][a-zA-Z0-9_]*\b)(?P<rest>[^{]*)(?P<computed>\s*{\s*)?')
+func_pattern = re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(?P<type>fun)\s+(?P<template><T>)?\s*(?P<name>[a-zA-Z_][a-zA-Z0-9_.]*\b)(?P<rest>[^{]*)')
+init_pattern = re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(?P<type>(init|constructor|firstconstructor))\s*(?P<rest>[^{]*)')
+var_pattern = re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(?P<type>var\s+|val\s+)(?P<name>[a-zA-Z_][a-zA-Z0-9_]*\b)(?P<rest>[^{]*)(?P<computed>\s*{\s*)?')
 case_pattern = re.compile(r'\s*case:\s+(?P<name>[a-zA-Z_][a-zA-Z0-9_]*\b)(\s*\(\s*(?P<raw_value>[a-zA-Z0-9_]*)\s*\)\s*)?')
 
 # signatures
 def class_sig(name=r'[a-zA-Z_][a-zA-Z0-9_]*'):
-    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+)?(final\s+|inline\s+|sealed\s+)?(?P<struct>class|object)\s+(?!fun)(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
+    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(final\s+|inline\s+|sealed\s+)?(?P<struct>class|object)\s+(?!fun)(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
 
 def fun_sig(name=r'[a-zA-Z_][a-zA-Z0-9_]*'):
-    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+)?(final\s+)?(?P<struct>fun)\s+(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
+    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(final\s+)?(?P<struct>fun)\s+(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
 
 
 def enum_class_sig(name=r'[a-zA-Z_][a-zA-Z0-9_]*'):
-    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+)?(final\s+)?(?P<struct>enum\s+class)\s+(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
+    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(final\s+)?(?P<struct>enum\s+class)\s+(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
 
 
 def data_class_sig(name=r'[a-zA-Z_][a-zA-Z0-9_]*'):
-    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+)?(final\s+)?(?P<struct>data\s+class)\s+(?!fun)(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
+    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(final\s+)?(?P<struct>data\s+class)\s+(?!fun)(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
 
 
 def interface_sig(name=r'[a-zA-Z_][a-zA-Z0-9_]*'):
-    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+)?(?P<struct>interface)\s+(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
+    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(?P<struct>interface)\s+(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
 
 
 def extension_sig(name=r'[a-zA-Z_][a-zA-Z0-9_]*'):
-    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+)?(?P<struct>extension)\s+(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
+    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(?P<struct>extension)\s+(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
 
 # brace balancing for determining in which depth we are
 string_pattern = re.compile(r'"(?:[^"\\]*(?:\\.)?)*"')
@@ -432,6 +432,8 @@ class KotlinFileIndex(object):
 
 
                             item_details = analyze_class_line(index, content)
+                            # print item['name']
+                            # print item_details
                             if item_details['no_body']:
                                 if item_details['constructor']:
                                     contentPlus = []
@@ -574,11 +576,9 @@ class KotlinObjectIndex(object):
 
                         docstring_new = ['Main constructor', '']
                         if 'rest' in match and match['rest']:
-                            #splitPos = match['rest'].find(')') + 1
-                            #if splitPos != 0:
-                            #    match['rest'] = match['rest'][:splitPos]
                             variables = match['rest'].strip()[1:-1].split(',')
                             firstVal = True
+                            match['rest'] = '('
                             for variable in variables:
                                 vmatch = var_pattern.match(variable)
                                 if vmatch:
@@ -589,6 +589,9 @@ class KotlinObjectIndex(object):
 
                                     if vscope == 'open':
                                         vscope = 'public'
+
+                                    if vscope != 'public':
+                                        continue
 
                                     vnameVal = vmatch['name'].strip() if 'name' in vmatch and vmatch['name'] else None
                                     vtypeVal = vmatch['type'].strip() if 'type' in vmatch and vmatch['type'] else None
@@ -602,13 +605,39 @@ class KotlinObjectIndex(object):
                                         'rest': vrestVal,
                                         'raw': variable
                                     })
+
+                                    if firstVal:
+                                        firstVal = False
+                                        if vrestVal:
+                                            match['rest'] += vnameVal + vrestVal
+                                        else:
+                                            match['rest'] += vnameVal
+                                    else:
+                                        if vrestVal:
+                                            match['rest'] += ', ' + vnameVal + vrestVal
+                                        else:
+                                            match['rest'] += ', ' + vnameVal
                                 else:
+
                                     strip_variable = variable.replace(':', '|').replace('=', '|').split('|')
                                     param_docstring = get_docstring_for_param(strip_variable[0], docstring)
+
+                                    if firstVal:
+                                        firstVal = False
+                                        if strip_variable[1]:
+                                            match['rest'] += strip_variable[0] + strip_variable[1]
+                                        else:
+                                            match['rest'] += strip_variable[0]
+                                    else:
+                                        if strip_variable[1]:
+                                            match['rest'] += ', ' + strip_variable[0] + strip_variable[1]
+                                        else:
+                                            match['rest'] += ', ' + strip_variable[0]
+
                                     if param_docstring:
                                         docstring_new.append('@param ' + strip_variable[0] + ' ' + ''.join(param_docstring))
 
-                            # match['rest'] += ')'
+                            match['rest'] += ')'
                         for constructorVariable in constructorVariables:
                             if constructorVariable['docstring']:
                                 docstring_new.append('@param ' + constructorVariable['name'] + ' ' + ''.join(constructorVariable['docstring']))
