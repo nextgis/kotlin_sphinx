@@ -254,12 +254,16 @@ def is_inside_comment(test_word, line):
     test_pos = line.find(test_word)
     return  test_pos > pos_comment_beg and test_pos < pos_comment_end
 
-def is_stop_word_present(line):
+def is_stop_word_present(line, commnets = True):
     line = comment_pattern.sub("", line)
     clear_line = clear_name(line, ' ')
     for stop_word in stop_words:
         if stop_word + ' ' in clear_line:
             return True
+
+    if commnets and '/**' in clear_line:
+        return True
+
     return False
 
 def analyze_class_line(index, content):
@@ -280,9 +284,9 @@ def analyze_class_line(index, content):
         out['start'] = i
         strip_content = content[i].strip()
 
-        comment_balance = balance_comment(strip_content, comment_balance)
+        # comment_balance = balance_comment(strip_content, comment_balance)
 
-        if brace_balance == 0 and comment_balance == 0:
+        if brace_balance == 0: # and comment_balance == 0:
             if is_stop_word_present(strip_content):
                 stop_words_count += 1
 
@@ -347,7 +351,7 @@ def prepare_enum_class(index, content):
         comment_balance = balance_comment(strip_content, comment_balance)
 
         if brace_balance == 0 and comment_balance == 0:
-            if is_stop_word_present(strip_content):
+            if is_stop_word_present(strip_content, False):
                 end_enum_block = True
 
         # check comment line
@@ -598,22 +602,13 @@ class KotlinObjectIndex(object):
                                         'rest': vrestVal,
                                         'raw': variable
                                     })
-                                    if firstVal:
-                                        firstVal = False
-                                        if vrestVal:
-                                            match['rest'] = '(' + vnameVal + vrestVal
-                                        else:
-                                            match['rest'] = '(' + vnameVal
-                                    else:
-                                        if vrestVal:
-                                            match['rest'] += ', ' + vnameVal + vrestVal
-                                        else:
-                                            match['rest'] += ', ' + vnameVal
                                 else:
                                     strip_variable = variable.replace(':', '|').replace('=', '|').split('|')
-                                    docstring_new.append('@param ' + strip_variable[0] + ' ' + ''.join(get_docstring_for_param(strip_variable[0], docstring)))
+                                    param_docstring = get_docstring_for_param(strip_variable[0], docstring)
+                                    if param_docstring:
+                                        docstring_new.append('@param ' + strip_variable[0] + ' ' + ''.join(param_docstring))
 
-                            match['rest'] += ')'
+                            # match['rest'] += ')'
                         for constructorVariable in constructorVariables:
                             if constructorVariable['docstring']:
                                 docstring_new.append('@param ' + constructorVariable['name'] + ' ' + ''.join(constructorVariable['docstring']))

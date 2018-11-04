@@ -133,7 +133,7 @@ class KotlinClass(KotlinObjectDescription):
         if class_name.count('.'):
             class_name = class_name.split('.')[-1]
 
-        # if we have more than one part this class has super classes / protocols
+        # if we have more than one part this class has super classes / interfaces
         super_classes = None
         if len(parts) > 1:
             super_classes = [x.strip() for x in parts[1].split(',')]
@@ -358,8 +358,8 @@ class KotlinClassmember(KotlinObjectDescription):
             # signode += addnodes.desc_returns(return_type, return_type)
             signature += '-' + return_type
 
-        #if container_class_type == 'protocol':
-        #    signature += "-protocol"
+        #if container_class_type == 'interface':
+        #    signature += "-interface"
 
         #if self.objtype == 'static_method':
         #    signature += '-static'
@@ -479,7 +479,7 @@ class KotlinXRefRole(XRefRole):
         return title, self.tipe+" "+target
 
 
-type_order = ['class', 'data_class', 'enum_class', 'protocol', 'extension']
+type_order = ['class', 'data_class', 'enum_class', 'interface', 'extension']
 
 class KotlinModuleIndex(Index):
     """
@@ -569,7 +569,7 @@ class KotlinDomain(Domain):
         'data_class':      ObjType(l_('data class'),          'data_class',   'obj'),
         'init':            ObjType(l_('initializer'),         'init',         'obj'),
         'constructor':     ObjType(l_('constructor'),         'constructor',  'obj'),
-        'protocol':        ObjType(l_('protocol'),            'protocol',     'obj'),
+        'interface':       ObjType(l_('interface'),           'interface',    'obj'),
         'extension':       ObjType(l_('extension'),           'extension',    'obj'),
         'default_impl':    ObjType(l_('default implementation'),'default_impl','obj'),
         'val':             ObjType(l_('constant'),            'val',          'obj'),
@@ -588,7 +588,7 @@ class KotlinDomain(Domain):
         'data_class':      KotlinClass,
         'init':            KotlinClassmember,
         'constructor':     KotlinClassmember,
-        'protocol':        KotlinClass,
+        'interface':       KotlinClass,
         'extension':       KotlinClass,
         'default_impl':    KotlinClass,
         'val':             KotlinClassIvar,
@@ -607,7 +607,7 @@ class KotlinDomain(Domain):
         'init':          KotlinXRefRole("init"),
         'constructor':   KotlinXRefRole("constructor"),
         'class_method':  KotlinXRefRole("class_method"),
-        'protocol':      KotlinXRefRole("protocol"),
+        'interface':     KotlinXRefRole('interface'),
         'extension':     KotlinXRefRole("extension"),
         'default_impl':  KotlinXRefRole("default_impl"),
         'val':           KotlinXRefRole("let"),
