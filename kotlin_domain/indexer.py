@@ -590,8 +590,9 @@ class KotlinObjectIndex(object):
                                     if vscope == 'open':
                                         vscope = 'public'
 
-                                    if vscope != 'public':
-                                        continue
+                                    # In constructor all inputs should listed
+                                    # if vscope != 'public':
+                                    #     continue
 
                                     vnameVal = vmatch['name'].strip() if 'name' in vmatch and vmatch['name'] else None
                                     vtypeVal = vmatch['type'].strip() if 'type' in vmatch and vmatch['type'] else None
