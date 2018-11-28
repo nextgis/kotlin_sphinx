@@ -27,7 +27,7 @@ import fnmatch
 import io
 
 # member patterns
-func_pattern = re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(?P<type>fun)\s+(?P<template><T>)?\s*(?P<name>[a-zA-Z_][a-zA-Z0-9_.]*\b)(?P<rest>[^{]*)')
+func_pattern = re.compile(r'\s*(?P<scope>private\s+|public\s+|external\s+|open\s+|internal\s+|protected\s+)?(?P<type>fun)\s+(?P<template><T>)?\s*(?P<name>[a-zA-Z_][a-zA-Z0-9_.]*\b)(?P<rest>[^{]*)')
 init_pattern = re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(?P<type>(init|constructor|firstconstructor))\s*(?P<rest>[^{]*)')
 var_pattern = re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(?P<type>var\s+|val\s+)(?P<name>[a-zA-Z_][a-zA-Z0-9_]*\b)(?P<rest>[^{]*)(?P<computed>\s*{\s*)?')
 case_pattern = re.compile(r'\s*case:\s+(?P<name>[a-zA-Z_][a-zA-Z0-9_]*\b)(\s*\(\s*(?P<raw_value>[a-zA-Z0-9_]*)\s*\)\s*)?')
@@ -37,7 +37,7 @@ def class_sig(name=r'[a-zA-Z_][a-zA-Z0-9_]*'):
     return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(final\s+|inline\s+|sealed\s+)?(?P<struct>class|object)\s+(?!fun)(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
 
 def fun_sig(name=r'[a-zA-Z_][a-zA-Z0-9_]*'):
-    return re.compile(r'\s*(?P<scope>private\s+|public\s+|open\s+|internal\s+|protected\s+)?(final\s+)?(?P<struct>fun)\s+(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
+    return re.compile(r'\s*(?P<scope>private\s+|public\s+|public\s+|open\s+|internal\s+|protected\s+)?(final\s+)?(?P<struct>fun)\s+(?P<name>' + name + r'\b)(\s*:\s*(?P<type>[^{]*))*(?P<rest>[^{]*)')
 
 
 def enum_class_sig(name=r'[a-zA-Z_][a-zA-Z0-9_]*'):
@@ -76,8 +76,8 @@ typical_patterns = {
 codeblock_pattern = re.compile(r'```')
 
 stop_words = [
-    'public', 'private', 'open', 'internal', 'data class', 'interface', 'enum',
-    'fun', 'var', 'val', 'companion', 'object', 'class',
+    'public', 'private', 'open', 'internal', 'external', 'data class', 'interface',
+    'enum', 'fun', 'var', 'val', 'companion', 'object', 'class',
 ]
 
 def balance_braces(line, brace_count):
@@ -402,7 +402,7 @@ class KotlinFileIndex(object):
                             if 'scope' in match and match['scope']:
                                 scope = match['scope'].strip()
 
-                            if scope == 'open':
+                            if scope == 'open' or scope == 'external':
                                 scope = 'public'
 
                             typeVal = clear_name(struct)
@@ -532,7 +532,7 @@ class KotlinObjectIndex(object):
                     if 'scope' in match and match['scope']:
                         scope = match['scope'].strip()
 
-                    if scope == 'open':
+                    if scope == 'open' or scope == 'external':
                         scope = 'public'
 
                     doc_block_pos = l.find('/**<')
@@ -587,7 +587,7 @@ class KotlinObjectIndex(object):
                                     if 'scope' in vmatch and vmatch['scope']:
                                         vscope = vmatch['scope'].strip()
 
-                                    if vscope == 'open':
+                                    if vscope == 'open' or vscope == 'external':
                                         vscope = 'public'
 
                                     # In constructor all inputs should listed
