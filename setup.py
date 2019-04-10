@@ -14,7 +14,7 @@ setup(
     description='Kotlin support for Sphinx.',
     long_description=open('README.md').read(),
     zip_safe=False,
-    packages=[kotlin_domain'],
+    packages=['kotlin_domain'],
     package_data={},
     entry_points={
         'console_scripts': [
