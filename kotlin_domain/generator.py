@@ -49,16 +49,16 @@ def main():
         pass
 
     # check for overwrite
-    for file, members in file_index.by_file().items():
+    for file, members in list(file_index.by_file().items()):
         destfile = get_dest_file(file, args.source_path, args.documentation_path)
         if os.path.exists(destfile) and not args.overwrite:
-            print("""ERROR: {} already exists, to overwrite existing
-                     documentation use the '--overwrite' flag""".format(file))
+            print(("""ERROR: {} already exists, to overwrite existing
+                     documentation use the '--overwrite' flag""".format(file)))
             exit(1)
 
-    for file, members in file_index.by_file().items():
+    for file, members in list(file_index.by_file().items()):
         destfile = get_dest_file(file, args.source_path, args.documentation_path)
-        print("Writing documentation for '{}'...".format(os.path.relpath(file, source_path)))
+        print(("Writing documentation for '{}'...".format(os.path.relpath(file, source_path))))
         try:
             os.makedirs(os.path.dirname(destfile))
         except:

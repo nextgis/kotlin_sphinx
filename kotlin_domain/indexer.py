@@ -226,7 +226,7 @@ def doc_block_to_rst(doc_block, is_class = False):
             continue
 
         c = False #continue if required
-        for name,pattern in typical_patterns.items():
+        for name,pattern in list(typical_patterns.items()):
             match = pattern.match(l)
             if match:
                 match = match.groupdict()
@@ -383,7 +383,7 @@ class KotlinFileIndex(object):
                     self.files.append(os.path.join(root, filename))
 
         for file in self.files:
-            print("Indexing kotlin file: %s" % file)
+            print(("Indexing kotlin file: %s" % file))
             symbol_stack = []
             braces = 0
             with io.open(file, mode="r", encoding="utf-8") as fp:
