@@ -49,7 +49,7 @@ from docutils.parsers.rst import directives
 
 from sphinx import addnodes
 from sphinx.roles import XRefRole
-from sphinx.locale import l_
+from sphinx.locale import _, __
 from sphinx.domains import Domain, ObjType, Index
 from sphinx.directives import ObjectDescription
 from sphinx.util.nodes import make_refnode
