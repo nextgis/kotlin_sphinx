@@ -83,6 +83,9 @@ class KotlinObjectDescription(ObjectDescription):
         'noindex': directives.flag,
     }
 
+    def warn(self, msg):
+        self.state_machine.reporter.warning(msg, line=self.lineno)
+
     def add_target_and_index(self, name_cls_add, sig, signode):
         fullname, signature, add_to_index = name_cls_add
         if 'noindex' in self.options or not add_to_index:
@@ -98,12 +101,8 @@ class KotlinObjectDescription(ObjectDescription):
             self.env.domaindata['kotlin']['objects'][fullname] = (self.env.docname, self.objtype, signature)
         else:
             objects = self.env.domaindata['kotlin']['objects']
-            self.env.warn(
-                self.env.docname,
-                'duplicate object description of %s, ' % fullname +
-                'other instance in ' +
-                self.env.doc2path(objects[fullname][0]),
-                self.lineno)
+            self.warn('duplicate object description of %s, ' % fullname +
+                'other instance in ' + self.env.doc2path(objects[fullname][0]))
 
 
 class KotlinClass(KotlinObjectDescription):
@@ -184,13 +183,13 @@ class KotlinClass(KotlinObjectDescription):
 class KotlinClassmember(KotlinObjectDescription):
 
     doc_field_types = [
-        TypedField('parameter', label=l_('Parameters'),
+        TypedField('parameter', label=_('Parameters'),
                    names=('param', 'parameter', 'arg', 'argument'),
                    typerolename='obj', typenames=('paramtype', 'type')),
-        GroupedField('errors', label=l_('Throws'), rolename='obj',
+        GroupedField('errors', label=_('Throws'), rolename='obj',
                      names=('raises', 'raise', 'exception', 'except', 'throw', 'throws'),
                      can_collapse=True),
-        Field('returnvalue', label=l_('Returns'), has_arg=False,
+        Field('returnvalue', label=_('Returns'), has_arg=False,
               names=('returns', 'return')),
     ]
 
@@ -415,19 +414,19 @@ var_sig = re.compile(r'^\s*(?P<name>[a-zA-Z_][a-zA-Z0-9_]*\b)(\s*:\s*(?P<type>[a
 class KotlinClassIvar(KotlinObjectDescription):
 
     doc_field_types = [
-        Field('defaultvalue', label=l_('Default'), has_arg=False,
+        Field('defaultvalue', label=_('Default'), has_arg=False,
               names=('defaults', 'default')),
     ]
+
+    def warn(self, msg):
+        self.state_machine.reporter.warning(msg, line=self.lineno)
 
     def handle_signature(self, sig, signode):
         container_class_name = self.env.temp_data.get('kotlin:class')
 
         match = var_sig.match(sig)
         if not match:
-            self.env.warn(
-                self.env.docname,
-                'invalid variable/constant documentation string "%s", ' % sig,
-                self.lineno)
+            self.warn('invalid variable/constant documentation string "%s", ' % sig)
             return
 
         match = match.groupdict()
@@ -487,8 +486,8 @@ class KotlinModuleIndex(Index):
     """
 
     name = 'modindex'
-    localname = l_('Kotlin Module Index')
-    shortname = l_('Index')
+    localname = _('Kotlin Module Index')
+    shortname = _('Index')
 
     @staticmethod
     def indexsorter(a):
@@ -558,22 +557,22 @@ class KotlinDomain(Domain):
     name = 'kotlin'
     label = 'Kotlin'
     object_types = {
-        'function':        ObjType(l_('function'),            'function',     'obj'),
-        'fun':             ObjType(l_('fun'),                 'fun',          'obj'),
-        'static_fun':      ObjType(l_('static fun'),          'static_fun',   'obj'),
-        'class_method':    ObjType(l_('class method'),        'class_method', 'obj'),
-        'object':          ObjType(l_('object'),              'object',       'obj'),
-        'class':           ObjType(l_('class'),               'class',        'obj'),
-        'enum_class':      ObjType(l_('enum class'),          'enum_class',   'obj'),
-        'enum_case':       ObjType(l_('enum case'),           'enum_case',    'obj'),
-        'data_class':      ObjType(l_('data class'),          'data_class',   'obj'),
-        'init':            ObjType(l_('initializer'),         'init',         'obj'),
-        'constructor':     ObjType(l_('constructor'),         'constructor',  'obj'),
-        'interface':       ObjType(l_('interface'),           'interface',    'obj'),
-        'extension':       ObjType(l_('extension'),           'extension',    'obj'),
-        'default_impl':    ObjType(l_('default implementation'),'default_impl','obj'),
-        'val':             ObjType(l_('constant'),            'val',          'obj'),
-        'var':             ObjType(l_('variable'),            'var',          'obj'),
+        'function':        ObjType(_('function'),            'function',     'obj'),
+        'fun':             ObjType(_('fun'),                 'fun',          'obj'),
+        'static_fun':      ObjType(_('static fun'),          'static_fun',   'obj'),
+        'class_method':    ObjType(_('class method'),        'class_method', 'obj'),
+        'object':          ObjType(_('object'),              'object',       'obj'),
+        'class':           ObjType(_('class'),               'class',        'obj'),
+        'enum_class':      ObjType(_('enum class'),          'enum_class',   'obj'),
+        'enum_case':       ObjType(_('enum case'),           'enum_case',    'obj'),
+        'data_class':      ObjType(_('data class'),          'data_class',   'obj'),
+        'init':            ObjType(_('initializer'),         'init',         'obj'),
+        'constructor':     ObjType(_('constructor'),         'constructor',  'obj'),
+        'interface':       ObjType(_('interface'),           'interface',    'obj'),
+        'extension':       ObjType(_('extension'),           'extension',    'obj'),
+        'default_impl':    ObjType(_('default implementation'),'default_impl','obj'),
+        'val':             ObjType(_('constant'),            'val',          'obj'),
+        'var':             ObjType(_('variable'),            'var',          'obj'),
     }
 
     directives = {
