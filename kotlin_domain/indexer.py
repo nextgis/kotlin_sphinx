@@ -621,16 +621,17 @@ class KotlinObjectIndex(object):
                                 else:
 
                                     strip_variable = variable.replace(':', '|').replace('=', '|').split('|')
+                                    print(strip_variable)
                                     param_docstring = get_docstring_for_param(strip_variable[0], docstring)
 
                                     if firstVal:
                                         firstVal = False
-                                        if strip_variable[1]:
+                                        if len(strip_variable) > 1 and strip_variable[1]:
                                             match['rest'] += strip_variable[0] + strip_variable[1]
                                         else:
                                             match['rest'] += strip_variable[0]
                                     else:
-                                        if strip_variable[1]:
+                                        if len(strip_variable) > 1 and strip_variable[1]:
                                             match['rest'] += ', ' + strip_variable[0] + strip_variable[1]
                                         else:
                                             match['rest'] += ', ' + strip_variable[0]
