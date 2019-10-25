@@ -4,7 +4,7 @@
 # Purpose:  Kotlin KDoc to sphinx documentation generator
 # Author:   Dmitry Barishnikov, dmitry.baryshnikov@nextgis.ru
 ################################################################################
-# Copyright (C) 2018, NextGIS <info@nextgis.com>
+# Copyright (C) 2018-2019, NextGIS <info@nextgis.com>
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -115,18 +115,22 @@ def get_doc_block(content, line):
     for i in reversed(content[:line+1]):
         l = i.rstrip()
         startsComment = False
-        endsComment = False
+        # endsComment = False
         if l.endswith("*/"):
-            endsComment = True
+            # endsComment = True
             l = l[:-2]
             block_detected = True
         if l.strip().startswith("/**"):
             startsComment = True
             l = l.strip()[3:]
         elif l.startswith("/*"):
-            return [] #not a doc comment
+            return [] # not a doc comment
 
-        if not block_detected: #don't go searching arbitrarily far back
+        new_l = l.strip()
+        if new_l == '' or new_l.startswith('@'):
+            continue
+
+        if not block_detected: # don't go searching arbitrarily far back
             break
 
         #insert on top
@@ -135,32 +139,20 @@ def get_doc_block(content, line):
 
         if startsComment:
             break
+    
     return doc_block
 
 def clear_name(name, replace = '_'):
     return re.sub( '\s+', replace, name ).strip()
 
-def get_docstring_for_val(vnameVal, docstring):
-    out = []
-    startDoc = False
-    for line in docstring:
-        if '@property[' + vnameVal + ']' in line or '@property ' + vnameVal + ' ' in line:
-            out.append(line.strip()[12 + len(vnameVal):])
-            startDoc = True
-
-        if startDoc:
-            if not line or '@' in line:
-                return out
-            out.append(line)
-    return out
-
-def get_docstring_for_param(vnameVal, docstring):
+def get_docstring_for(name, vnameVal, docstring):
+    offset = 2 + len(name)
     vnameValStrip = vnameVal.strip()
     out = []
     startDoc = False
     for line in docstring:
-        if '@param[' + vnameValStrip + ']' in line or '@param ' + vnameValStrip + ' ' in line:
-            out.append(line.strip()[10 + len(vnameValStrip):])
+        if '{}[{}]'.format(name, vnameValStrip) in line or '{} {} '.format(name, vnameValStrip) in line:
+            out.append(line.strip()[offset + len(vnameValStrip):])
             startDoc = True
 
         if startDoc:
@@ -168,6 +160,12 @@ def get_docstring_for_param(vnameVal, docstring):
                 return out
             out.append(line)
     return out
+
+def get_docstring_for_val(vnameVal, docstring):
+    return get_docstring_for('@property', vnameVal, docstring)
+
+def get_docstring_for_param(vnameVal, docstring):
+    return get_docstring_for('@param', vnameVal, docstring)
 
 def doc_line_to_rst(doc_line):
     if doc_line:
@@ -621,7 +619,7 @@ class KotlinObjectIndex(object):
                                 else:
 
                                     strip_variable = variable.replace(':', '|').replace('=', '|').split('|')
-                                    print(strip_variable)
+                                    # print(strip_variable)
                                     param_docstring = get_docstring_for_param(strip_variable[0], docstring)
 
                                     if firstVal:

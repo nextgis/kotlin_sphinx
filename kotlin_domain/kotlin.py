@@ -280,9 +280,6 @@ class KotlinClassmember(KotlinObjectDescription):
         if parameter_list:
             parameters = self._parse_parameter_list(parameter_list)
 
-        # check if it throws
-        throws = rest.find('throws') >= 0
-
         # check for return type
         return_type = None
         # balance_braces = 0
@@ -344,9 +341,6 @@ class KotlinClassmember(KotlinObjectDescription):
         signode += addnodes.desc_parameterlist(sig, "", *params)
 
         title = signature
-        if throws:
-            signode += addnodes.desc_annotation("throws", "throws")
-            signature += "throws"
 
         if return_type:
             paramNode = addnodes.desc_type(' : ', ' : ') #desc_returns('', '')
