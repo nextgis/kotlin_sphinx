@@ -111,6 +111,7 @@ def get_doc_block(content, line):
     # search upwards for documentation lines
     doc_block = []
     block_detected = False
+    spaces = 0
 
     for i in reversed(content[:line+1]):
         l = i.rstrip()
@@ -127,8 +128,13 @@ def get_doc_block(content, line):
             return [] # not a doc comment
 
         new_l = l.strip()
-        if new_l == '' or new_l.startswith('@'):
+        if new_l.startswith('@'):
             continue
+
+        if new_l == '':
+            spaces += 1
+            if spaces < 4:
+                continue
 
         if not block_detected: # don't go searching arbitrarily far back
             break
