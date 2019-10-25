@@ -131,10 +131,10 @@ def get_doc_block(content, line):
         if new_l.startswith('@'):
             continue
 
-        if new_l == '':
-            spaces += 1
-            if spaces < 4:
-                continue
+        # if new_l == '':
+        #     spaces += 1
+        #     if spaces < 2:
+        #         continue
 
         if not block_detected: # don't go searching arbitrarily far back
             break
