@@ -27,6 +27,7 @@ setup(
         'License :: OSI Approved :: GPL v2 License',
         'Environment :: Console',
         'Environment :: Web Environment',
+        'Framework :: Sphinx :: Domain',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3',
         'Operating System :: OS Independent',
